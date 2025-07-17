@@ -11,6 +11,14 @@ function App() {
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
   const [step, setStep] = useState('login'); // login, userinfo, goal, plan
+  const [userInfo, setUserInfo] = useState({
+    age: '',
+    job: '',
+    career: '',
+    skills: '',
+    region: '',
+    gender: '',
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,6 +53,18 @@ function App() {
     setStep('login');
   };
 
+  // 사용자 정보 입력 핸들러
+  const handleUserInfoChange = (e) => {
+    const { name, value } = e.target;
+    setUserInfo((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // 사용자 정보 입력 완료 후 다음 단계로
+  const handleUserInfoSubmit = (e) => {
+    e.preventDefault();
+    setStep('goal');
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -61,7 +81,18 @@ function App() {
             <button onClick={handleLogout} style={{ marginTop: 8 }}>로그아웃</button>
           </div>
         )}
-        {/* 아래에 단계별 화면 분기 추가 예정 */}
+        {step === 'userinfo' && (
+          <form onSubmit={handleUserInfoSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 320, margin: '0 auto' }}>
+            <input name="age" type="number" min="0" max="120" placeholder="나이" value={userInfo.age} onChange={handleUserInfoChange} required />
+            <input name="gender" placeholder="성별(선택)" value={userInfo.gender} onChange={handleUserInfoChange} />
+            <input name="region" placeholder="거주 지역(도시/국가)" value={userInfo.region} onChange={handleUserInfoChange} />
+            <input name="job" placeholder="직업" value={userInfo.job} onChange={handleUserInfoChange} required />
+            <input name="career" placeholder="주요 경력/전공" value={userInfo.career} onChange={handleUserInfoChange} />
+            <input name="skills" placeholder="능력/스킬(예: 영어 중급, IT 활용 등)" value={userInfo.skills} onChange={handleUserInfoChange} />
+            <button type="submit" style={{ padding: '10px 0', fontSize: 16 }}>다음</button>
+          </form>
+        )}
+        {/* 목표/계획 입력 및 결과 화면은 step === 'goal' 이후에 분기 */}
         <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
           <input
             type="text"
