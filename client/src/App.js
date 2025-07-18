@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 import { auth, provider } from './firebase';
@@ -35,6 +35,29 @@ function App() {
   const [failReasons, setFailReasons] = useState({}); // 실패 이유
   const [coaching, setCoaching] = useState('');
   const [coachingLoading, setCoachingLoading] = useState(false);
+
+  // 로컬스토리지에서 상태 복구
+  useEffect(() => {
+    const saved = localStorage.getItem('haru_state');
+    if (saved) {
+      const s = JSON.parse(saved);
+      setUser(s.user || null);
+      setUserInfo(s.userInfo || {});
+      setGoalInput(s.goalInput || {});
+      setPlan(s.plan || []);
+      setChecked(s.checked || []);
+      setFailReasons(s.failReasons || {});
+      setExp(s.exp || 0);
+      setLevel(s.level || 1);
+      setStep(s.step || 'login');
+    }
+  }, []);
+  // 주요 상태 변경 시 로컬스토리지에 저장
+  useEffect(() => {
+    localStorage.setItem('haru_state', JSON.stringify({
+      user, userInfo, goalInput, plan, checked, failReasons, exp, level, step
+    }));
+  }, [user, userInfo, goalInput, plan, checked, failReasons, exp, level, step]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
