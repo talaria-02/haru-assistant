@@ -33,6 +33,8 @@ function App() {
   const [level, setLevel] = useState(1);
   const [checked, setChecked] = useState([]); // 체크리스트 완료 여부
   const [failReasons, setFailReasons] = useState({}); // 실패 이유
+  const [coaching, setCoaching] = useState('');
+  const [coachingLoading, setCoachingLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -139,6 +141,27 @@ function App() {
     setFailReasons((prev) => ({ ...prev, [idx]: value }));
   };
 
+  // AI 코칭 요청
+  const handleCoaching = async () => {
+    setCoachingLoading(true);
+    setCoaching('');
+    try {
+      const res = await axios.post('http://localhost:5000/api/coaching', {
+        userInfo,
+        goalInput,
+        plan,
+        checked,
+        failReasons,
+        period: 'week', // 'week' or 'month', 확장 가능
+      });
+      setCoaching(res.data.coaching);
+    } catch (err) {
+      setCoaching('AI 코칭 요청에 실패했습니다.');
+    } finally {
+      setCoachingLoading(false);
+    }
+  };
+
   // 실패 이유 선택형 옵션
   const failOptions = ['시간 부족', '동기 저하', '외부 사정', '계획 미흡', '기타'];
 
@@ -212,6 +235,15 @@ function App() {
                 </li>
               ))}
             </ol>
+            <button onClick={handleCoaching} style={{ width: '100%', padding: 12, fontSize: 16, margin: '16px 0' }}>
+              {coachingLoading ? 'AI 코칭 생성 중...' : '이번주 AI 코칭 받기'}
+            </button>
+            {coaching && (
+              <div style={{ background: '#f5f5f5', borderRadius: 8, padding: 16, marginTop: 8, fontSize: 15 }}>
+                <b>AI 코칭</b><br />
+                {coaching}
+              </div>
+            )}
           </div>
         )}
         {/* 목표/계획 입력 및 결과 화면은 step === 'goal' 이후에 분기 */}

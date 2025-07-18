@@ -21,6 +21,25 @@ app.post('/api/plan', (req, res) => {
   res.json({ plan: dummyPlan, goal });
 });
 
+// AI 코칭 엔드포인트 (임시 더미)
+app.post('/api/coaching', (req, res) => {
+  const { userInfo, goalInput, plan, checked, failReasons, period } = req.body;
+  // TODO: OpenAI 연동 후 실제 코칭 생성
+  const done = plan.filter((_, i) => checked[i]).length;
+  const total = plan.length;
+  const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+  let feedback = `이번 ${period === 'month' ? '달' : '주'}의 목표 달성률은 ${percent}%입니다.\n`;
+  if (percent >= 80) feedback += '아주 잘하고 있어요! 이대로 꾸준히 실천해보세요.';
+  else if (percent >= 50) feedback += '절반 이상 달성했어요. 실패한 이유를 돌아보고, 다음엔 더 높은 달성률을 목표로 해봐요!';
+  else feedback += '아직 부족하지만, 포기하지 말고 작은 것부터 실천해보세요.';
+  if (Object.values(failReasons).some(r => r.option || r.text)) {
+    feedback += '\n실패 이유 분석: ';
+    feedback += Object.values(failReasons).map(r => r.option || '').filter(Boolean).join(', ');
+    feedback += Object.values(failReasons).map(r => r.text || '').filter(Boolean).length ? ' / ' + Object.values(failReasons).map(r => r.text || '').filter(Boolean).join(', ') : '';
+  }
+  res.json({ coaching: feedback });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
